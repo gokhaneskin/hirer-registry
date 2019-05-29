@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org">
+<th:block th:replace="fragments/head" />
+<title>Kullanıcı Sayfası</title>
+<script th:src="@{/js/jquery-3.3.1.min.js}"></script>
+<body>
+	<th:block th:replace="fragments/nav" />
+	<br />
+	<div class="container">
+		<ul class="nav nav-tabs">
+			<li class="nav-item"><a class="nav-link active show"
+				data-toggle="tab" href="#announcements"><i
+					class="fas fa-list-ul"></i> İlanlarım</a></li>
+			<li class="nav-item"><a class="nav-link" data-toggle="tab"
+				href="#profile"><i class="fas fa-user"></i> Profil</a></li>
+			<li class="nav-item" sec:authorize="hasAuthority('ADMIN')"
+				onclick="getUsers()"><a class="nav-link" data-toggle="tab"
+				href="#users"><i class="fas fa-user"></i> Kullanıcı Yönetimi</a></li>
+		</ul>
+		<div id="myTabContent" class="tab-content">
+			<div class="tab-pane fade active show" id="announcements">
+				<div class="container">
+					<br />
+					<!-- Button trigger modal -->
+					<button type="button" class="btn btn-success" data-toggle="modal"
+						data-target="#addAnnouncement" id="btn" th:value="${user.id}">
+						<i class="fas fa-plus"></i> Ekle
+					</button>
+
+					<!-- Modal -->
+					<div class="modal fade" id="addAnnouncement" tabindex="-1"
+						role="dialog" aria-labelledby="exampleModalLabel"
+						aria-hidden="true">
+						<div class="modal-dialog" role="document">
+							<div class="modal-content">
+								<div class="modal-header">
+									<h5 class="modal-title" id="exampleModalLabel">İlan Ekle</h5>
+									<button type="button" class="close" data-dismiss="modal"
+										aria-label="Close">
+										<span aria-hidden="true">&times;</span>
+									</button>
+								</div>
+								<div class="modal-body">
+									<form id="announcementForm">
+										<fieldset>
+											<div class="form-group">
+												<label for="formTitle">Başlık</label> <input type="text"
+													class="form-control" placeholder="Örn. Deniz manzaralı"
+													id="formTitle" th:required="required" />
+											</div>
+											<div class="form-group">
+												<label for="formDesc">Açıklama</label>
+												<textarea class="form-control" id="formDesc"
+													placeholder="Örn. Metro vs ulaşım imkanları" rows="2"></textarea>
+											</div>
+											<div class="form-group">
+												<label for="formPrice">Ücret</label> <input type="number"
+													min="0" class="form-control" placeholder="Örn. 1350"
+													id="formPrice" />
+											</div>
+											<div class="form-group">
+												<label for="formType">Tip</label> <select id="formType"
+													class="custom-select">
+													<option>Tipi Seçin</option>
+													<option>DAİRE</option>
+													<option>DÜKKAN</option>
+												</select>
+											</div>
+											<div class="form-group">
+												<label for="formM2">Metre Kare</label> <input type="number"
+													min="0" class="form-control" placeholder="Örn. 100"
+													id="formM2" />
+											</div>
+											<div class="form-group">
+												<label for="formRoom">Oda Sayısı</label> <input type="text"
+													class="form-control" placeholder="Örn. 2+1" id="formRoom" />
+											</div>
+											<div class="form-group">
+												<label for="formHeat">Isıtma Şekli</label> <input
+													type="text" class="form-control"
+													placeholder="Örn. Kalorifer" id="formHeat" />
+											</div>
+											<div class="form-group">
+												<label for="formPhone">Telefon</label> <input type="text"
+													class="form-control" placeholder="Örn. 0532000000"
+													id="formPhone" />
+											</div>
+											<div class="form-group">
+												<label for="formProvince">İl</label> <select
+													onchange="getDistricts()" id="formProvince"
+													class="custom-select">
+													<option>İl Seçin</option>
+													<option th:each="provinces :${provinces}"
+														th:value="${provinces.province_id}"
+														th:text="${provinces.province}"></option>
+												</select> <label for="formDistrict">İlçe</label> <select
+													onchange="getAdress()" id="formDistrict"
+													disabled="disabled" class="custom-select">
+													<option>İlçe Seçin</option>
+												</select> <label for="formAdress">Mahalle</label> <select
+													id="formAdress" disabled="disabled" class="custom-select">
+													<option>Mahalle Seçin</option>
+												</select>
+											</div>
+										</fieldset>
+									</form>
+								</div>
+								<div class="modal-footer">
+									<button type="button" class="btn btn-secondary"
+										data-dismiss="modal">Kapat</button>
+									<button type="button" class="btn btn-primary"
+										onclick="saveNewAnnouncement()" data-dismiss="modal">Kaydet</button>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<h2 style="text-align: center;">İlanlarım</h2>
+					<table class="table table-hover" id="table"
+						style="text-align: center;">
+						<thead>
+							<tr>
+								<th scope="col">İlan No</th>
+								<th scope="col">Başlık</th>
+								<th scope="col">Fiyat</th>
+								<th scope="col">Seçenekler</th>
+							</tr>
+						</thead>
+						<tbody id="tbody">
+
+						</tbody>
+					</table>
+					<hr style="border-width: 2px;" />
+
+				</div>
+			</div>
+			<div class="tab-pane fade" id="profile">
+				<div class="container">
+					<br />
+					<!-- Button trigger modal -->
+					<button type="button" class="btn btn-success" data-toggle="modal"
+						data-target="#changePassword">
+						<i class="fas fa-plus"></i> Şifreyi Güncelle
+					</button>
+					<br /> <br />
+					<form class="form-signin" method="post"
+						enctype="multipart/form-data" th:action="@{/user/upload}">
+						<div class="col-lg-6">
+							<h4>Profil Resimi Yükleyin/Güncelleyin</h4>
+							<img
+								th:src="@{/user/profile-picture}" />
+						</div>
+						<br />
+						<div class="col-lg-6">
+							<input type="file" name="file" class="form-control top" /><small id="fileHelp"
+								class="form-text text-muted">Küçük boyutta resimler seçiniz!</small><br />
+							<button class="btn btn-lg btn-primary btn-block" type="submit">Yükle</button>
+						</div>
+
+
+					</form>
+
+
+					<!-- Modal -->
+					<div class="modal fade" id="changePassword" tabindex="-1"
+						role="dialog" aria-labelledby="exampleModalLabel"
+						aria-hidden="true">
+						<div class="modal-dialog" role="document">
+							<div class="modal-content">
+								<div class="modal-header">
+									<h5 class="modal-title" id="exampleModalLabel">Şifre Girin</h5>
+									<button type="button" class="close" data-dismiss="modal"
+										aria-label="Close">
+										<span aria-hidden="true">&times;</span>
+									</button>
+								</div>
+								<div class="modal-body">
+									<form id="formPassword" name="form1">
+										<h6 class="modal-title" id="exampleModalLabel">Şifre</h6>
+										<input type="password" class="form-control" id="password"
+											required="required" autofocus="autofocus" />
+										<h6 class="modal-title" id="exampleModalLabel">Şifre
+											Tekrar</h6>
+										<input type="password" class="form-control" id="password2"
+											required="required" autofocus="autofocus" />
+									</form>
+								</div>
+								<div class="modal-footer">
+									<button type="button" class="btn btn-secondary"
+										data-dismiss="modal">Kapat</button>
+									<button type="button" class="btn btn-primary"
+										onclick="updatePassword()" data-dismiss="modal">Şifre
+										Güncelle</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+			</div>
+			<div class="tab-pane fade" id="users">
+				<br />
+				<div class="container">
+					<h2 style="text-align: center;">Kullanıcılar</h2>
+					<table class="table table-hover" id="tableUser"
+						style="text-align: center;">
+						<thead>
+							<tr>
+								<th scope="col">Kullanıcı ID</th>
+								<th scope="col">Kullanıcı Adı</th>
+								<th scope="col">Ad</th>
+								<th scope="col">Soyad</th>
+								<th scope="col">Durum</th>
+								<th scope="col">Seçenekler</th>
+							</tr>
+						</thead>
+						<tbody id="tbodyUser">
+
+						</tbody>
+					</table>
+					<hr style="border-width: 2px;" />
+				</div>
+			</div>
+		</div>
+	</div>
+
+</body>
+<script type="text/javascript">
+	$(document).ready(function() {
+		getAnnouncements();
+	});
+
+	var updatePassword = function() {
+
+		var psw1 = $("#password").val();
+		var psw2 = $("#password2").val();
+		var id = $("#btn").val();
+		if (psw1 == psw2) {
+			var formData = {
+				password : $("#password").val()
+			}
+			$.ajax({
+				type : "POST",
+				url : "http://localhost:8080/api/updatePassword/" + id,
+				data : formData,
+				contentType : "application/x-www-form-urlencoded",
+				success : function() {
+					console.log("Başarılı");
+
+				},
+				error : function(e) {
+					console.log("Hata Var => " + e)
+				},
+				done : function(e) {
+					console.log("Tamam");
+				}
+			});
+		} else {
+			alert("Şifreler uyuşmuyor!")
+		}
+
+	}
+
+	var getUsers = function() {
+		$("#tbodyUser").find('tr').remove();
+		$
+				.ajax({
+					type : "POST",
+					url : "http://localhost:8080/api/getUsers",
+					dataType : 'text',
+					success : function(data) {
+						console.log("basarili " + data)
+						var test = JSON.parse(data);
+						for ( var k in test) {
+							$("#tbodyUser")
+									.append(
+											'<tr><th scope="row">'
+													+ test[k].id
+													+ '</th><td>'
+													+ test[k].username
+													+ '</td><td>'
+													+ test[k].firstname
+													+ '</td><td>'
+													+ test[k].lastname
+													+ '</td><td>'
+													+ test[k].active
+													+ '</td><td><button type="button" class="btn btn-outline-success" onclick="activedUser('
+													+ test[k].id
+													+ ')"><i class="far fa-check-circle"></i> Aktifleştir</button> <button type="button" class="btn btn-outline-warning" onclick="unactivedUser('
+													+ test[k].id
+													+ ')"><i class="far fa-check-circle"></i> Pasif Yap</button> </td></tr>');
+						}
+					},
+					error : function(e) {
+						console.log("Hata Var => " + e)
+					},
+					done : function(e) {
+						console.log("Tamam");
+					}
+				});
+	}
+
+	var saveNewAnnouncement = function() {
+		var formData = {
+			title : $("#formTitle").val(),
+			description : $("#formDesc").val(),
+			price : $("#formPrice").val(),
+			type : $("#formType").val(),
+			m2 : $("#formM2").val(),
+			room : $("#formRoom").val(),
+			heat : $("#formHeat").val(),
+			phone : $("#formPhone").val(),
+			adress : $("#formAdress").val()
+
+		}
+
+		$.ajax({
+			type : "POST",
+			url : "http://localhost:8080/api/saveAnnouncement",
+			data : formData,
+			contentType : "application/x-www-form-urlencoded",
+			success : function() {
+				console.log("basarili"), getAnnouncements();
+			},
+			error : function(e) {
+				console.log("Hata Var => " + e)
+			},
+			done : function(e) {
+				console.log("Tamam");
+			}
+		})
+
+	}
+
+	var unactivedUser = function(veri) {
+		$.ajax({
+			type : "POST",
+			url : "http://localhost:8080/api/unactivedUser/" + veri,
+			success : function() {
+				console.log("Başarılı");
+				getUsers();
+			},
+			error : function(e) {
+				console.log("Hata Var => " + e)
+			},
+			done : function(e) {
+				console.log("Tamam");
+			}
+		});
+	}
+
+	var activedUser = function(veri) {
+		$.ajax({
+			type : "POST",
+			url : "http://localhost:8080/api/activedUser/" + veri,
+			success : function() {
+				console.log("Başarılı");
+				getUsers();
+			},
+			error : function(e) {
+				console.log("Hata Var => " + e)
+			},
+			done : function(e) {
+				console.log("Tamam");
+			}
+		});
+	}
+
+	var activeFalse = function(veri) {
+		$.ajax({
+			type : "POST",
+			url : "http://localhost:8080/api/activeFalse/" + veri,
+			success : function() {
+				console.log("Başarılı");
+				getAnnouncements();
+
+			},
+			error : function(e) {
+				console.log("Hata Var => " + e)
+			},
+			done : function(e) {
+				console.log("Tamam");
+			}
+		});
+	}
+
+	var deleteAnnouncement = function(veri) {
+		$.ajax({
+			type : "POST",
+			url : "http://localhost:8080/api/deleteAnnouncement/" + veri,
+			success : function() {
+				console.log("Başarılı");
+				getAnnouncements();
+
+			},
+			error : function(e) {
+				console.log("Hata Var => " + e)
+			},
+			done : function(e) {
+				console.log("Tamam");
+			}
+		});
+	}
+
+	var getAnnouncements = function() {
+		$("#tbody").find('tr').remove();
+		var id = $("#btn").val();
+		$
+				.ajax({
+					type : "POST",
+					url : "http://localhost:8080/api/announcementsByUser/" + id,
+					dataType : 'text',
+					success : function(data) {
+						console.log("basarili " + data)
+						var test = JSON.parse(data);
+						for ( var k in test) {
+							$("#tbody")
+									.append(
+											'<tr><th scope="row">'
+													+ test[k].id
+													+ '</th><td>'
+													+ test[k].title
+													+ '</td><td>'
+													+ test[k].price
+													+ ' ₺</td><td><a href="/user/profile/myAnnoDetail/'+test[k].id+'"><button type="button" class="btn btn-outline-success"><i class="fas fa-edit"></i> Düzenle</button></a> <a href="/user/profile/addAnnoPhoto/'+test[k].id+'"><button type="button" class="btn btn-outline-success"><i class="fas fa-edit"></i> Resim Ekle</button></a> <button type="button" class="btn btn-outline-warning" onclick="activeFalse('
+													+ test[k].id
+													+ ')"><i class="far fa-check-circle"></i> Pasif Yap</button> <button type="button" class="btn btn-outline-danger" onclick="deleteAnnouncement('
+													+ test[k].id
+													+ ')"><i class="fas fa-trash-alt"></i> Sil</button></td></tr>');
+						}
+					},
+					error : function(e) {
+						console.log("Hata Var => " + e)
+					},
+					done : function(e) {
+						console.log("Tamam");
+					}
+				});
+	}
+	var getDistricts = function() {
+		var id = $("#formProvince :selected").val();
+		$("#formDistrict").find('option').remove();
+		$("#formDistrict").append('<option value="none">İlçe Seçiniz</option>');
+
+		$.ajax({
+			type : "POST",
+			url : "http://localhost:8080/api/district/" + id,
+			dataType : 'text',
+			success : function(data) {
+				console.log("basarili " + data)
+
+				var test = JSON.parse(data);
+
+				var sel = document.getElementById('formDistrict')
+				$("#formDistrict").prop('disabled', false);
+				// 				$("#selectDistrict").find('option').remove();
+				for ( var k in test) {
+					var opt = document.createElement('option')
+					opt.appendChild(document.createTextNode(test[k].name))
+					opt.value = test[k].id
+					sel.appendChild(opt)
+				}
+			},
+			error : function(e) {
+				console.log("Hata Var => " + e)
+			},
+			done : function(e) {
+				console.log("Tamam");
+			}
+		});
+
+	}
+	var getAdress = function() {
+		$("#formAdress").prop('disabled', false);
+		var id = $("#formDistrict :selected").val();
+		$("#formAdress").find('option').remove();
+		$("#formAdress")
+				.append('<option value="none">Mahalle Seçiniz</option>');
+		$.ajax({
+			type : "POST",
+			url : "http://localhost:8080/api/adress/" + id,
+			dataType : 'text',
+			success : function(data) {
+				console.log("basarili " + data)
+				var test = JSON.parse(data);
+
+				var sel = document.getElementById('formAdress')
+				$("#formAdress").prop('disabled', false);
+				for ( var k in test) {
+					var opt = document.createElement('option')
+					opt.appendChild(document.createTextNode(test[k].name))
+					opt.value = test[k].id
+					sel.appendChild(opt)
+				}
+			},
+			error : function(e) {
+				console.log("Hata Var => " + e)
+			},
+			done : function(e) {
+				console.log("Tamam");
+			}
+		});
+	}
+</script>
+</html>

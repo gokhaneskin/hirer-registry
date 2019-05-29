@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org">
+<th:block th:replace="fragments/head" />
+<title th:text="${announcement.announcement_id}"></title>
+<script th:src="@{/js/jquery-3.3.1.min.js}"></script>
+<body>
+	<th:block th:replace="fragments/nav" />
+	<br />
+	<div class="container">
+		<form>
+			<fieldset>
+				<div class="row">
+					<div class="col-lg-6">
+						<div class="form-group">
+							<label for="formTitle">Başlık</label>
+							<button type="button" hidden="true" id="annoID"
+								th:value="${announcement.announcement_id}"></button>
+							<input type="text" class="form-control"
+								placeholder="Örn. Deniz manzaralı" id="formTitle"
+								th:required="required" th:value="${announcement.title}" />
+						</div>
+						<div class="form-group">
+							<label for="formDesc">Açıklama</label>
+							<textarea class="form-control" id="formDesc"
+								placeholder="Örn. Metro vs ulaşım imkanları" rows="2"
+								th:text="${announcement.description}"></textarea>
+						</div>
+						<div class="form-group">
+							<label for="formPrice">Ücret</label> <input type="number" min="0"
+								class="form-control" placeholder="Örn. 1350"
+								th:value="${announcement.price}" id="formPrice" />
+						</div>
+						<div class="form-group">
+							<label for="formM2">Metre Kare</label> <input type="number"
+								min="0" class="form-control" placeholder="Örn. 100"
+								th:value="${announcement.m2}" id="formM2" />
+						</div>
+					</div>
+					<div class="col-lg-4">
+
+						<div class="form-group">
+							<label for="formRoom">Oda Sayısı</label> <input type="text"
+								class="form-control" placeholder="Örn. 2+1"
+								th:value="${announcement.room}" id="formRoom" />
+						</div>
+						<div class="form-group">
+							<label for="formHeat">Isıtma Şekli</label> <input type="text"
+								class="form-control" placeholder="Örn. Kalorifer"
+								th:value="${announcement.heat}" id="formHeat" />
+						</div>
+						<div class="form-group">
+							<label for="formPhone">Telefon</label> <input type="text"
+								class="form-control" placeholder="Örn. 0532000000"
+								id="formPhone" th:value="${announcement.phone}" />
+						</div>
+						<hr />
+						<button type="button" class="btn btn-success"
+							onclick="updateAnnouncement()">
+							<i class="fas fa-save"></i> Güncelle
+						</button>
+					</div>
+				</div>
+			</fieldset>
+		</form>
+	</div>
+
+</body>
+<script type="text/javascript">
+	var updateAnnouncement = function() {
+		var id = $("#annoID").val();
+		var formData = {
+				title : $("#formTitle").val(),
+				description : $("#formDesc").val(),
+				price : $("#formPrice").val(),
+				m2 : $("#formM2").val(),
+				room : $("#formRoom").val(),
+				heat : $("#formHeat").val(),
+				phone : $("#formPhone").val(),
+			}
+		$.ajax({
+			type : "POST",
+			url : "http://localhost:8080/api/updateAnnouncement/" + id,
+			data : formData,
+			contentType : "application/x-www-form-urlencoded",
+			success : function() {
+				console.log("Başarılı");
+				alert("Güncelleme Başarılı")
+			},
+			error : function(e) {
+				console.log("Hata Var => " + e)
+			},
+			done : function(e) {
+				console.log("Tamam");
+			}
+		});
+	}
+</script>
+</html>

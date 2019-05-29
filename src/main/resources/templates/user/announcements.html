@@ -1,0 +1,223 @@
+
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org">
+
+<th:block th:replace="fragments/head" />
+<title>İlanlar</title>
+<script th:src="@{/js/jquery-3.3.1.min.js}"></script>
+
+<body>
+	<th:block th:replace="fragments/nav" />
+
+	<div class="container">
+		<br />
+		<div class="panel-group">
+			<div class="panel panel-default">
+				<div class="panel-heading">
+					<h4 class="panel-title">
+						<span class="badge badge-pill badge-warning"><i
+							class="fas fa-filter"></i> <a data-toggle="collapse"
+							href="#collapse1" style="color: white; font-family: consolas;">Adres Filtreleme</a></span>
+					</h4>
+				</div>
+				<div id="collapse1" class="panel-collapse collapse">
+					<div class="panel-body">
+												
+					</div>
+					<div class="panel-footer">
+						<hr color="#E99002" />
+						<div class="row">
+							<div class="col-md-4">
+								<p style="text-align: center;">
+									<span class="badge badge-info">İl</span>
+								</p>
+								<select class="custom-select" style="font-size: small;"
+									id="selectProvince" onchange="getDistricts()">
+									<option value="NONE">İl Seçiniz</option>
+									<option th:each="provinces :${provinces}"
+										th:value="${provinces.province_id}"
+										th:text="${provinces.province}"></option>
+								</select>
+							</div>
+							<div class="col-md-4">
+								<p style="text-align: center;">
+									<span class="badge badge-info">İlçe</span>
+								</p>
+								<select class="custom-select" style="font-size: small;"
+									id="selectDistrict" disabled="disabled" onchange="getAdress()">
+									<option value="NONE">İlçe Seçiniz...</option>
+								</select>
+							</div>
+							<div class="col-md-4">
+								<p style="text-align: center;">
+									<span class="badge badge-info">Mahalle</span>
+								</p>
+								<select class="custom-select" style="font-size: small;"
+									id="selectAdress" disabled="disabled">
+									<option>Mahalle seçiniz...</option>
+								</select>
+								<hr />
+							</div>
+
+						</div>
+						<div class="row">
+							<div class="col-md-4"></div>
+							<div class="col-md-4"></div>
+							<div class="col-md-4">
+								<p style="text-align: center;">
+									<button type="button" class="btn btn-primary"
+										onclick="getAnouncements()">İlanları Getir</button>
+								</p>
+
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<hr color="#E99002" />
+	<div class="container">
+		<div class="row" id="announcements">
+			<div class="col-md-4" th:each="announcements :${announcementList}">
+				<div class="card mb-4 shadow-sm">
+					<img class="card-img-top"
+						data-src="holder.js/100px225?theme=thumb&amp;bg=55595c&amp;fg=eceeef&amp;text=Thumbnail"
+						alt="Thumbnail [100%x225]"
+						style="height: 225px; width: 100%; display: block;"
+						th:src="@{/user/annoPicture-picture/__${announcements.announcement_id}__}"
+						data-holder-rendered="true" />
+					<div class="card-body">
+						<a id="body"
+							style="font-family: consolas; color: #43ac6a; font-weight: bold;"
+							th:href="@{/user/announcement_detail/__${announcements.announcement_id}__}"
+							class="card-text" th:text="${announcements.title}"></a>
+						<p class="text-muted" style="font-size: x-small;"
+							th:text="${announcements.adress.adress}+' / '+${announcements.adress.district.district}+' / '+${announcements.adress.district.province.province}"></p>
+						<span class="badge badge-pill badge-success"
+							th:text="${announcements.price}+' ₺'"></span>
+						<div class="d-flex justify-content-between align-items-center">
+							<div class="btn-group">
+								<a
+									th:href="@{/user/profile/user_detail/__${announcements.user.id}__}">
+									<span class="badge badge-pill badge-warning"
+									th:text="${announcements.user.firstname}+' '+${announcements.user.lastname}"></span>
+								</a>
+							</div>
+							<small class="text-muted" style="font-weight: bold;"
+								th:text="${#dates.format(announcements.date, 'dd-MMMM-yyyy')}"></small>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+<script type="text/javascript">
+	var getDistricts = function() {
+		var id = $("#selectProvince :selected").val();
+		$("#selectDistrict").find('option').remove();
+		$("#selectDistrict").append(
+				'<option value="none">İlçe Seçiniz</option>');
+
+		$.ajax({
+			type : "POST",
+			url : "http://localhost:8080/api/district/" + id,
+			dataType : 'text',
+			success : function(data) {
+				console.log("basarili " + data)
+
+				var test = JSON.parse(data);
+
+				var sel = document.getElementById('selectDistrict')
+				$("#selectDistrict").prop('disabled', false);
+				// 				$("#selectDistrict").find('option').remove();
+				for ( var k in test) {
+					var opt = document.createElement('option')
+					opt.appendChild(document.createTextNode(test[k].name))
+					opt.value = test[k].id
+					sel.appendChild(opt)
+				}
+			},
+			error : function(e) {
+				console.log("Hata Var => " + e)
+			},
+			done : function(e) {
+				console.log("Tamam");
+			}
+		});
+
+	}
+	var getAdress = function() {
+		$("#selectAdress").prop('disabled', false);
+		var id = $("#selectDistrict :selected").val();
+		$("#selectAdress").find('option').remove();
+		$("#selectAdress").append(
+				'<option value="none">Mahalle Seçiniz</option>');
+		$.ajax({
+			type : "POST",
+			url : "http://localhost:8080/api/adress/" + id,
+			dataType : 'text',
+			success : function(data) {
+				console.log("basarili " + data)
+				var test = JSON.parse(data);
+
+				var sel = document.getElementById('selectAdress')
+				$("#selectAdress").prop('disabled', false);
+				// 				$("#selectAdress").find('option').remove();
+				for ( var k in test) {
+					var opt = document.createElement('option')
+					opt.appendChild(document.createTextNode(test[k].name))
+					opt.value = test[k].id
+					sel.appendChild(opt)
+				}
+			},
+			error : function(e) {
+				console.log("Hata Var => " + e)
+			},
+			done : function(e) {
+				console.log("Tamam");
+			}
+		});
+	}
+	var getAnouncements = function() {
+		var id = $("#selectAdress :selected").val();
+		$("#announcements").find('div').remove();
+		$.ajax({
+					type : "POST",
+					url : "http://localhost:8080/api/announcements/" + id,
+					dataType : 'text',
+					success : function(data) {
+						console.log("basarili " + data)
+						var test = JSON.parse(data);
+
+						var sel = document.getElementById('selectAdress')
+						$("#selectAdress").prop('disabled', false);
+						for ( var k in test) {
+							$("#announcements")
+									.append(
+											'<div class="col-md-4"><div class="card mb-4 shadow-sm"><img class="card-img-top" data-src="holder.js/100px225?theme=thumb&amp;bg=55595c&amp;fg=eceeef&amp;text=Thumbnail" alt="Thumbnail [100%x225]" style="height: 225px; width: 100%; display: block;" src="/img/announcement/'
+													+ test[k].id
+													+ '.jpg" /><div class="card-body"><a id="body" style="font-family: consolas; color: #43ac6a; font-weight: bold;" href="/user/announcement_detail/'+test[k].id+'" class="card-text">'
+													+ test[k].title
+													+ '</a><p class="text-muted" style="font-size: x-small;"> '
+													+ test[k].adress
+													+ '/'
+													+ test[k].district
+													+ '/'
+													+ test[k].province
+													+ '</p><span class="badge badge-pill badge-success">'+test[k].price+' ₺</span><div class="d-flex justify-content-between align-items-center"><div class="btn-group"><a href="/user/profile/user_detail/'+test[k].userid+'"><span class="badge badge-pill badge-warning">'+test[k].user+'</span></a></div><small class="text-muted" style="font-weight: bold;"> '+test[k].date+'</small></div></div></div></div>');
+						}
+					},
+					error : function(e) {
+						console.log("Hata Var => " + e)
+					},
+					done : function(e) {
+						console.log("Tamam");
+					}
+				});
+	}
+</script>
+</html>

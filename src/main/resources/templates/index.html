@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org">
+
+
+<th:block th:replace="fragments/head" />
+<title>E-Kiracım</title>
+<body>
+	<th:block th:replace="fragments/nav" />
+	<div class="jumbotron" sec:authorize="isAuthenticated()">
+		<div class="row">
+			<div>
+				<small class="lead">Sayın </small><small class="lead"
+					th:utext="${userName}"></small>
+				<h2 class="display-3">Hoşgeldin!</h2>
+				<hr class="my-4" />
+				<p class="lead">
+					<a class="btn btn-outline-primary btn-lg" th:href="@{/logout}"
+						role="button"><i class="fas fa-sign-out-alt"></i> Çıkış</a>
+				</p>
+			</div>
+			
+		</div>
+	</div>
+	<div class="jumbotron" sec:authorize="!isAuthenticated()">
+		<div class="row">
+			<div>
+				<h1 class="display-4">Merhaba!</h1>
+				<h3>
+					Konutlarınızı, dükkanlarınızı kiralamadan önce platformumuza bi'
+					göz atmalısın. <i class="far fa-smile-wink"></i>
+				</h3>
+				<hr class="my-4" />
+				<p>Platformumuza üye olarak, kiracılarınız hakkında detaylara
+					ulaşabilir ve ileride yaşanacak problemlere başlamadan çözüm
+					bulabilirsin...</p>
+				<h4>Hadi aramıza katıl!</h4>
+				<p class="lead">
+					<a class="btn btn-outline-primary btn-lg" th:href="@{/signup}"
+						role="button"><i class="fas fa-sign-out-alt"></i> Üye Ol</a> <a
+						class="btn btn-outline-primary btn-lg" th:href="@{/login}"
+						role="button"><i class="fas fa-sign-out-alt"></i> Giriş Yap</a>
+				</p>
+			</div>
+		</div>
+
+	</div>
+
+</body>
+</html>

@@ -1,0 +1,31 @@
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org">
+	<a class="navbar-brand" th:href="@{/}"><i class="fas fa-home"></i> E-Kiracım</a>
+	<button class="navbar-toggler" type="button" data-toggle="collapse"
+		data-target="#navbarColor01" aria-controls="navbarColor01"
+		aria-expanded="false" aria-label="Toggle navigation">
+		<span class="navbar-toggler-icon"></span>
+	</button>
+	<div class="collapse navbar-collapse" id="navbarColor01">
+		<ul class="navbar-nav mr-auto">
+			<li class="nav-item"><a class="nav-link" th:href="@{/user/announcements}"><i class="fas fa-list-ul"></i> İlanlar <span
+					class="sr-only">(current)</span>
+			</a></li>
+		</ul>
+		<div class="form-inline my-2 my-lg-0">
+			<ul class="navbar-nav mr-auto">
+				<li class="nav-item"><a class="nav-link" th:href="@{/login}"
+					sec:authorize="!isFullyAuthenticated()"><i class="fas fa-user"></i>
+						Giriş</a></li>
+				<li class="nav-item"><a class="nav-link" th:href="@{/user/profile/myprofile}"
+					sec:authorize="isFullyAuthenticated()"><i class="fas fa-user"></i> <th:block th:text="${userName}" /></a></li>
+				<li class="nav-item"><a class="nav-link" th:href="@{/logout}"
+					sec:authorize="isFullyAuthenticated()"><i
+						class="fas fa-sign-out-alt"></i> Çıkış</a></li>
+			</ul>
+
+		</div>
+	</div>
+</nav>

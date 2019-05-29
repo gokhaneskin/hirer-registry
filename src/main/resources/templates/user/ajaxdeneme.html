@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org">
+
+
+<th:block th:replace="fragments/head" />
+<title>Ajax Deneme</title>
+<body>
+	<th:block th:replace="fragments/nav" />
+	<div class="container">
+		<h2 align="center" style="color: green;" class="alert alert-info">Update
+			Employee</h2>
+		<br />
+
+		<div id="msgDiv" style="display: none; color: green;" align="center"></div>
+		<br />
+		<div class="form-group">
+			<select class="custom-select" id="selectEmploy">
+				<option value="NONE">İlan Seçiniz</option>
+				<option th:each="announcements :${announcementList}"
+					th:value="${announcements.announcement_id}+'/'+${announcements.user.firstname}+' '+${announcements.user.lastname}"
+					th:text="${announcements.title}"></option>
+			</select> 
+			<label class="sr-only">Email</label> <input
+				type="text" id="EmpUptFistName" name="updFirstName" class="form-control"
+				autofocus="autofocus" />
+			<label class="sr-only">Emai2l</label> <input
+				type="text" id="EmpUptFistName2" name="updFirstName2" class="form-control"
+				autofocus="autofocus" />
+		</div>
+	</div>
+
+</body>
+<script type="text/javascript">
+	$(document).ready(function() {
+		$("#selectEmploy").change(function() {
+			var empId = $("#selectEmploy :selected").val();
+			empId=empId.split("/");
+			var empid2=empId[0];
+			var price=empId[1];
+			$("#EmpUptFistName").val(empid2);
+			$("#EmpUptFistName2").val(price);
+			$("#selectEmploy").prop('disabled',false);
+		})
+
+		// 		$("#btn").click(function() {
+		// 			$("#email").hide();
+		// 		})
+		// 		$("#btn2").click(function() {
+		// 			$("#email").show();
+		// 		})
+	})
+</script>
+</html>

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+
+<th:block th:replace="fragments/head" />
+<title>Giriş</title>
+
+<body>
+	<th:block th:replace="fragments/nav" />
+	<br />
+	<div class="container">
+		<div class="row">
+			<div class="col-lg-4">&nbsp;</div>
+			<div class="col-lg-4">
+				<div class="alert alert-dismissible alert-danger"
+					th:if="${param.error}">
+					<button type="button" class="close" data-dismiss="alert">&times;</button>
+					<h4 class="alert-heading">Uyarı!</h4>
+					<p class="mb-0">Hatalı Şifre veya E-posta Adresi!</p>
+				</div>
+
+				<form th:action="@{/login}" method="post">
+					<h2>Giriş</h2>
+					<label for="inputEmail" class="sr-only">Email</label> <input
+						type="email" id="email" name="email" class="form-control"
+						placeholder="Email" required="required" autofocus="autofocus" />
+					<label for="inputPassword" class="sr-only">Password</label> <input
+						type="password" id="password" name="password" class="form-control"
+						placeholder="Şifre" required="required" /><br />
+					<div class="margin-top20 text-center">
+						<button class="btn btn-primary" type="submit"><i class="fas fa-lock-open"></i> Giriş</button>
+					</div>
+					<br/>
+					<div class="margin-top20 text-center">
+						Hesabınız yok mu? <a th:href="@{/signup}">Bir hesap oluşturun.</a>
+					</div>
+				</form>
+			</div>
+			<div class="col-lg-4">&nbsp;</div>
+		</div>
+
+	</div>
+</body>
+</html>

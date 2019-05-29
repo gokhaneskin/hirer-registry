@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org">
+<th:block th:replace="fragments/head" />
+<title th:text="${announcement.announcement_id}"></title>
+<script th:src="@{/js/jquery-3.3.1.min.js}"></script>
+<body>
+	<th:block th:replace="fragments/nav" />
+	<br />
+	<div class="container">
+		<form class="form-signin" method="post" enctype="multipart/form-data"
+			th:action="@{/user/uploadAnnoPhoto/__${announcement.announcement_id}__}">
+			<fieldset>
+				<div class="row">
+					<div class="form-group">
+						<div class="col-lg-6">
+							<h4>İlan Resimi Yükleyin/Güncelleyin</h4>
+							<img
+								th:src="@{/user/annoPicture-picture/__${announcement.announcement_id}__}" /> <label
+								for="exampleInputFile">İlan Resimi</label> <input type="file"
+								name="file" class="form-control top" /> <small id="fileHelp"
+								class="form-text text-muted">Lütfen küçük boyutlu resim
+								kullanın.</small>
+						</div>
+						<div class="col-lg-6">
+							<button class="btn btn-lg btn-primary btn-block" type="submit">Yükle</button>
+						</div>
+
+					</div>
+				</div>
+			</fieldset>
+		</form>
+	</div>
+
+</body>
+</html>
